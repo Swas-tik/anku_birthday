@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For XYZ ♡</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#fff8fb;--ink:#281c22;--muted:#7c6c74;--pink:#ef5d83;--deep:#d94169;
+  --peach:#ffb28f;--purple:#c7b8ff;--glass:rgba(255,255,255,.68);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;overflow-x:hidden;font-family:"DM Sans",sans-serif;color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 8%,rgba(255,184,204,.45),transparent 29%),
+    radial-gradient(circle at 92% 15%,rgba(255,194,160,.34),transparent 29%),
+    radial-gradient(circle at 50% 100%,rgba(239,93,131,.13),transparent 38%),var(--bg);
+}
+button{font:inherit;border:0;cursor:pointer}
+canvas#scene{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#site{position:relative;z-index:2;opacity:0;visibility:hidden}
+.noise{position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.container{width:min(920px,calc(100% - 36px));margin:auto}
+.section{padding:110px 0}
+.glass{background:var(--glass);border:1px solid rgba(255,255,255,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 25px 80px rgba(180,65,100,.12)}
+.label{color:var(--deep);font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:18px}
+.btn{padding:14px 22px;border-radius:999px;font-weight:700;transition:.25s ease}
+.btn:hover{transform:translateY(-3px)}
+.primary{color:white;background:linear-gradient(135deg,#f36b8d,#d9436b);box-shadow:0 12px 30px rgba(217,67,107,.25)}
+.secondary{color:var(--ink);background:rgba(255,255,255,.67);border:1px solid white}
+
+/* INTRO */
+.intro{
+  position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:22px;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(255,148,180,.18),transparent 30%),
+    linear-gradient(135deg,#160e17,#27141e 52%,#180e18);
+  color:white;overflow:hidden;
+}
+.intro-glow{position:absolute;width:420px;height:420px;border-radius:50%;background:rgba(255,105,151,.12);filter:blur(70px)}
+.intro-card{width:min(560px,100%);text-align:center;position:relative}
+.intro-kicker{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:#ffb5c9;font-weight:700;margin-bottom:16px}
+.intro h1{font:600 clamp(3rem,10vw,6rem)/.9 "Playfair Display",serif;letter-spacing:-.06em}
+.intro h1 em{color:#ff8eac}
+.intro-sub{margin:18px auto 25px;max-width:430px;color:#dccbd1;line-height:1.7}
+.cake-wrap{position:relative;width:270px;height:245px;margin:0 auto 18px;cursor:pointer;touch-action:manipulation;outline:none}
+.cake{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:230px;height:125px}
+.cake-bottom,.cake-top{position:absolute;left:50%;transform:translateX(-50%);border-radius:18px 18px 25px 25px}
+.cake-bottom{bottom:0;width:230px;height:100px;background:linear-gradient(#ff9eb8,#ee7195);box-shadow:0 20px 45px rgba(0,0,0,.25)}
+.cake-bottom:before{content:"";position:absolute;left:0;right:0;top:18px;height:24px;border-radius:50%;background:#ffd8e2}
+.cake-top{bottom:70px;width:195px;height:55px;background:#ffe0e8;border-radius:50%}
+.icing{position:absolute;left:50%;bottom:55px;transform:translateX(-50%);width:195px;height:25px;background:#fff1f4;border-radius:50%;z-index:2}
+.icing:after{content:"";position:absolute;left:25px;right:25px;bottom:-20px;height:35px;background:#fff1f4;clip-path:polygon(0 0,100% 0,100% 40%,92% 65%,84% 35%,75% 100%,66% 55%,57% 80%,48% 38%,38% 90%,29% 48%,18% 72%,8% 38%,0 58%)}
+.candle{position:absolute;z-index:5;left:50%;bottom:104px;transform:translateX(-50%);width:15px;height:65px;border-radius:5px;background:repeating-linear-gradient(135deg,#fff 0 8px,#ff93af 8px 15px)}
+.flame{position:absolute;z-index:6;left:50%;bottom:164px;width:24px;height:34px;transform:translateX(-50%) rotate(45deg);border-radius:50% 0 50% 50%;background:linear-gradient(135deg,#fff5ad,#ffad38 55%,#ff6e51);filter:drop-shadow(0 0 12px #ff9d48);animation:flicker .14s infinite alternate}
+@keyframes flicker{to{transform:translateX(-50%) rotate(39deg) scale(.9,1.08)}}
+.flame.out{animation:none;opacity:0;transform:translateX(-50%) scale(.1);transition:.35s}
+.candle-hint{color:#e4d3d9;font-size:.82rem;margin:4px 0 16px}
+.blow-panel{display:block;visibility:visible;opacity:1;margin:28px auto 0;width:min(390px,100%);padding:0;border:0;background:transparent;position:relative;z-index:20}
+.blow-status{font-size:.82rem;color:#f6e8ed;margin-bottom:11px;min-height:22px}
+.micbar{height:7px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.micbar i{display:block;width:0;height:100%;background:linear-gradient(90deg,#ff9db6,#ffd08f);border-radius:inherit}
+.blow-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:13px}
+.blow-btn{display:block;margin:22px auto 0;padding:13px 28px;min-width:210px;border-radius:999px;background:#ff7fa2;color:#fff;font-weight:700;box-shadow:0 10px 25px rgba(255,100,145,.25)}
+.skip-btn{padding:12px 16px;border-radius:999px;background:transparent;color:#d9c8cf;border:1px solid rgba(255,255,255,.17)}
+.wish{display:none;margin-top:18px;font:italic 1.45rem "Playfair Display",serif;color:#ffd5df}
+.wish.show{display:block}
+
+/* HERO */
+.hero{min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;padding:70px 20px;position:relative}
+.hero-inner{width:min(850px,100%)}
+.badge{display:inline-flex;gap:8px;align-items:center;padding:9px 16px;border-radius:99px;background:rgba(255,255,255,.68);border:1px solid white;color:var(--deep);font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.hero h2{margin-top:25px;font:600 clamp(4.1rem,13vw,9rem)/.82 "Playfair Display",serif;letter-spacing:-.075em}
+.hero h2 span{display:block;color:var(--pink);font-style:italic}
+.hero-copy{max-width:620px;margin:32px auto 0;color:var(--muted);font-size:1.05rem;line-height:1.85}
+.hero-copy strong{color:var(--ink)}
+.hero-buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:34px}
+.scroll{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);font-size:.7rem;color:#a28d95;animation:bounce 2s infinite}
+@keyframes bounce{50%{transform:translate(-50%,7px)}}
+
+/* CONTENT */
+.card{padding:clamp(35px,7vw,70px);border-radius:36px;position:relative;overflow:hidden}
+.story-title{font:600 clamp(2.6rem,6vw,4.5rem)/1.03 "Playfair Display",serif;letter-spacing:-.05em}
+.story-title em{color:var(--pink)}
+.story-text{max-width:700px;margin-top:25px;color:var(--muted);line-height:1.9}
+.story-text strong{color:var(--ink)}
+.heading{text-align:center}
+.heading h3{font:600 clamp(2.7rem,6vw,4.4rem)/1 "Playfair Display",serif;letter-spacing:-.05em}
+.heading p{max-width:570px;margin:12px auto 45px;color:var(--muted);line-height:1.7}
+.traits,.games-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.trait{padding:29px;min-height:245px;border-radius:28px;transition:.35s cubic-bezier(.16,1,.3,1)}
+.trait:hover{transform:translateY(-8px) rotate(-1deg);box-shadow:0 25px 55px rgba(180,65,100,.12)}
+.trait:nth-child(2):hover{transform:translateY(-8px) rotate(1deg)}
+.trait-icon{width:52px;height:52px;display:grid;place-items:center;border-radius:17px;background:#fff;font-size:1.45rem;margin-bottom:21px}
+.trait h4{font:600 1.55rem "Playfair Display",serif;margin-bottom:10px}
+.trait p,.game p{color:var(--muted);font-size:.9rem;line-height:1.7}
+
+/* GAMES */
+.game{padding:30px;min-height:330px;border-radius:30px;overflow:hidden}
+.game-icon{font-size:2rem}.game h4{font:600 1.8rem "Playfair Display",serif;margin-top:14px}
+.heart-game{height:155px;margin-top:20px;border-radius:22px;background:rgba(255,255,255,.46);border:1px solid rgba(255,255,255,.82);position:relative;overflow:hidden}
+.score{position:absolute;right:14px;top:12px;color:var(--deep);font-size:.75rem;font-weight:700;z-index:3}
+.game-heart{position:absolute;width:34px;height:34px;display:grid;place-items:center;color:var(--pink);font-size:1.5rem;cursor:pointer}
+.smile-meter{height:11px;margin-top:24px;border-radius:99px;background:#efdee4;overflow:hidden}
+.smile-fill{width:0;height:100%;background:linear-gradient(90deg,#ffb18e,#ef5d83);border-radius:inherit}
+.result{min-height:26px;margin-top:14px;color:var(--deep);font-size:.8rem;font-weight:600}
+.options{display:grid;gap:8px;margin-top:16px}
+.option{padding:12px 14px;border-radius:14px;background:white;text-align:left;transition:.2s}
+.option:hover{transform:translateX(5px);background:#fff0f4}
+.fortune{min-height:72px;margin-top:20px;padding:16px;display:flex;align-items:center;border-radius:18px;background:rgba(255,255,255,.64);color:var(--muted);font-size:.84rem;line-height:1.6}
+
+/* FINAL */
+.final{padding:30px 0 120px}.final-card{text-align:center}
+.final-card h3{font:600 clamp(2.9rem,7vw,5rem)/.98 "Playfair Display",serif;letter-spacing:-.06em}
+.final-card>p{max-width:590px;margin:25px auto 30px;color:var(--muted);line-height:1.85}
+.secret{display:none;max-width:620px;margin:30px auto 0;padding:28px;border-radius:25px;background:rgba(255,255,255,.78)}
+.secret.show{display:block}
+.secret-main{font:600 1.45rem/1.55 "Playfair Display",serif}
+.secret-small{margin-top:17px;color:var(--muted);font-size:.8rem}
+footer{padding:0 20px 40px;text-align:center;color:#a18c94;font-size:.78rem}
+
+/* responsive */
+@media(max-width:760px){
+  .traits,.games-grid{grid-template-columns:1fr}
+  .trait{min-height:auto}
+  .card,.game,.final-card{border-radius:27px}
+  .cake-wrap{transform:scale(.9);margin-left:auto;margin-right:auto}
+}
+</style>
+</head>
+
+<body>
+<canvas id="scene"></canvas>
+<div class="noise"></div>
+
+<!-- FIRST SCREEN: CAKE + CANDLE -->
+<section class="intro" id="intro">
+  <div class="intro-glow"></div>
+  <div class="intro-card">
+    <div class="intro-kicker">A tiny birthday mission</div>
+    <h1>Happy Birthday,<br><em>XYZ.</em> ♡</h1>
+    <p class="intro-sub">Before we get to anything else... there is one very important birthday tradition.</p>
+
+    <div class="cake-wrap" id="cakeButton" role="button" tabindex="0" aria-label="Blow out the birthday candle">
+      <div class="cake">
+        <div class="cake-bottom"></div>
+        <div class="cake-top"></div>
+        <div class="icing"></div>
+        <div class="candle"></div>
+        <div class="flame" id="flame"></div>
+      </div>
+    </div>
+
+    <div class="candle-hint" id="blowStatus">Click the cake to blow out the candle. ✨</div>
+
+    <button class="blow-btn" id="blowBtn" type="button" onclick="blowCandle()">Blow candle</button>
+
+    <div class="wish" id="wish">Wish made. ✨</div>
+  </div>
+</section>
+
+<main id="site">
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">♡ a little something for XYZ</div>
+    <h2>Happy <span>Birthday.</span></h2>
+    <p class="hero-copy">
+      Today is your day.<br><br>
+      So I thought I'd make you something slightly more interesting than the usual
+      <strong>“Happy Birthday 🎂”</strong>.<br><br>
+      No big speech. Just a little something to make you smile.
+    </p>
+    <div class="hero-buttons">
+      <button class="btn primary" onclick="scrollToId('story')">Let's continue ✨</button>
+      <button class="btn secondary" onclick="birthdayConfetti()">Make it rain 🎉</button>
+    </div>
+  </div>
+  <div class="scroll">↓ keep going</div>
+</section>
+
+<section class="section" id="story">
+  <div class="container">
+    <div class="card glass">
+      <div class="label">A little birthday thought</div>
+      <h3 class="story-title">Some people are just <em>easy to remember.</em></h3>
+      <p class="story-text">
+        You know those people who somehow make conversations feel effortless?
+        The ones who can be completely easy-going one moment and then suddenly
+        bring a ridiculous amount of energy into the next?<br><br>
+        Yeah. You're kind of one of those people.<br><br>
+        There's something really nice about being around someone who is genuinely
+        friendly and comfortable being themselves.<br><br>
+        And then there's your smile.<br>
+        <strong>That deserves its own paragraph.</strong><br><br>
+        I'm not saying it's distracting. I'm just saying... it has a suspiciously
+        good track record of making conversations better. 😌<br><br>
+        Anyway, enough evidence. It's your birthday, and you're supposed to be enjoying yourself.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="heading">
+      <div class="label">Completely unofficial observations</div>
+      <h3>Things that make you, you.</h3>
+      <p>I could have made a serious list, but that sounded boring. So here's the more accurate version.</p>
+    </div>
+    <div class="traits">
+      <article class="trait glass"><div class="trait-icon">🌸</div><h4>Friendly</h4><p>You have that kind of personality that makes people feel comfortable without you having to try too hard. It's a pretty nice quality.</p></article>
+      <article class="trait glass"><div class="trait-icon">☀️</div><h4>Easy-going</h4><p>You somehow make “let's just see what happens” feel like an actual perfectly reasonable plan. Honestly, I like that.</p></article>
+      <article class="trait glass"><div class="trait-icon">⚡</div><h4>Pure energy</h4><p>There is clearly an invisible battery somewhere that you refuse to reveal. Please keep it charged.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="heading">
+      <div class="label">Birthday activities</div>
+      <h3>Okay, enough reading.</h3>
+      <p>You have games to play now. I don't make the rules. Actually... I do.</p>
+    </div>
+
+    <div class="games-grid">
+      <article class="game glass">
+        <div class="game-icon">💗</div><h4>Catch the hearts</h4>
+        <p>They're going to appear randomly. Catch as many as you can before they disappear.</p>
+        <div class="heart-game" id="heartGame"><div class="score">Hearts: <span id="heartScore">0</span></div></div>
+        <button class="btn primary" style="margin-top:14px" onclick="startHeartGame()">Start catching</button>
+      </article>
+
+      <article class="game glass">
+        <div class="game-icon">😊</div><h4>Smile experiment</h4>
+        <p>Completely scientific. Definitely not an excuse to compliment your smile.</p>
+        <div class="smile-meter"><div class="smile-fill" id="smileFill"></div></div>
+        <button class="btn primary" style="margin-top:18px" onclick="smile()">Smile for science</button>
+        <div class="result" id="smileResult"></div>
+      </article>
+
+      <article class="game glass">
+        <div class="game-icon">🧠</div><h4>Very important quiz</h4>
+        <p>Your birthday experience depends entirely on this answer.</p>
+        <div style="margin-top:20px;font-weight:700">What should you do today?</div>
+        <div class="options">
+          <button class="option" onclick="quiz(1)">A. Be productive</button>
+          <button class="option" onclick="quiz(2)">B. Eat something nice & enjoy the day</button>
+          <button class="option" onclick="quiz(3)">C. Pretend it's an ordinary day</button>
+        </div>
+        <div class="result" id="quizResult"></div>
+      </article>
+
+      <article class="game glass">
+        <div class="game-icon">🔮</div><h4>Birthday fortune</h4>
+        <p>The universe has prepared a few predictions for you. Some are suspiciously specific.</p>
+        <button class="btn primary" style="margin-top:22px" onclick="fortune()">Tell my fortune</button>
+        <div class="fortune" id="fortune">Your future is currently unavailable. Try asking again.</div>
+      </article>
+
+      <article class="game glass">
+        <div class="game-icon">🎁</div><h4>Compliment generator</h4>
+        <p>Press the button. Receive one completely honest birthday compliment.</p>
+        <button class="btn primary" style="margin-top:22px" onclick="compliment()">Give me one</button>
+        <div class="fortune" id="compliment">I'm waiting...</div>
+      </article>
+
+      <article class="game glass">
+        <div class="game-icon">🙈</div><h4>One suspicious button</h4>
+        <p>I specifically recommend that you don't press this.</p>
+        <button class="btn secondary" style="margin-top:22px" onclick="badIdea()">Definitely don't press</button>
+        <div class="result" id="badResult"></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="container">
+    <div class="final-card glass card">
+      <div class="label">One last thing</div>
+      <h3>I hope you have<br>a beautiful year.</h3>
+      <p>
+        I hope this year brings you lots of good moments.<br><br>
+        More laughter. More spontaneous plans. More things that make you excited.
+        More reasons to be your wonderfully easy-going, energetic self.<br><br>
+        And obviously... plenty of reasons to smile.<br><br>
+        Because, honestly, that smile deserves to make a frequent appearance. 😉
+      </p>
+      <button class="btn primary" id="revealButton" onclick="revealSecret()">There's something else 👀</button>
+
+      <div class="secret" id="secret">
+        <div class="secret-main">
+          Okay...<br><br>
+          I like you.<br><br>
+          You already know that, so this isn't exactly a shocking revelation. 😌<br><br>
+          I just wanted to say it in a slightly more interesting way.<br><br>
+          Anyway...<br>
+          Happy Birthday, XYZ.<br><br>
+          Keep smiling.<br>
+          It suits you.
+        </div>
+        <div class="secret-small">Now go enjoy your day. ♡</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>Made with ♥, a little too much effort, and very good intentions.</footer>
+</main>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* THREE background */
+const canvas=document.getElementById("scene");
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
+camera.position.z=8;
+const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+scene.add(new THREE.AmbientLight(0xffffff,1.8));
+const light=new THREE.PointLight(0xff91aa,3,20);light.position.set(2,3,5);scene.add(light);
+
+const particlesN=170, pos=new Float32Array(particlesN*3);
+for(let i=0;i<pos.length;i++)pos[i]=(Math.random()-.5)*15;
+const pg=new THREE.BufferGeometry();
+pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
+const pts=new THREE.Points(pg,new THREE.PointsMaterial({color:0xff9db5,size:.045,transparent:true,opacity:.55}));
+scene.add(pts);
+
+const hearts=new THREE.Group();scene.add(hearts);
+function heart3d(x,y,z,s){
+  const shape=new THREE.Shape();
+  shape.moveTo(0,.2);shape.bezierCurveTo(-.6,.7,-1.2,.1,0,-.7);shape.bezierCurveTo(1.2,.1,.6,.7,0,.2);
+  const m=new THREE.Mesh(new THREE.ShapeGeometry(shape),new THREE.MeshBasicMaterial({color:0xef5d83,transparent:true,opacity:.14,side:THREE.DoubleSide}));
+  m.position.set(x,y,z);m.scale.setScalar(s);hearts.add(m);
+}
+for(let i=0;i<14;i++)heart3d((Math.random()-.5)*9,(Math.random()-.5)*6,-2,.15+Math.random()*.2);
+
+let mx=0,my=0;
+addEventListener("mousemove",e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+function render(){
+  requestAnimationFrame(render);
+  const t=performance.now()*.001;
+  pts.rotation.y=t*.025;
+  hearts.rotation.y+=((mx*.25)-hearts.rotation.y)*.03;
+  hearts.rotation.x+=((my*.15)-hearts.rotation.x)*.03;
+  camera.position.x+=(mx*.35-camera.position.x)*.03;
+  camera.position.y+=(-my*.25-camera.position.y)*.03;
+  renderer.render(scene,camera);
+}
+render();
+addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+/* Cake click → candle out → reveal website */
+const flame=document.getElementById("flame");
+const cakeButton=document.getElementById("cakeButton");
+const status=document.getElementById("blowStatus");
+const wish=document.getElementById("wish");
+let finished=false;
+
+function extinguish(){
+  if(finished)return;
+  finished=true;
+
+  flame.classList.add("out");
+  status.textContent="Wish made. ✨";
+  wish.classList.add("show");
+
+  birthdayConfetti();
+
+  gsap.timeline()
+    .to("#cakeButton",{y:-10,scale:1.06,duration:.3,ease:"power2.out"})
+    .to("#cakeButton",{y:0,scale:1,duration:.65,ease:"elastic.out(1,.5)"})
+    .to("#blowStatus",{opacity:0,y:8,duration:.3,delay:.35})
+    .to("#intro",{
+      opacity:0,
+      duration:.9,
+      delay:.35,
+      onComplete:()=>{
+        document.getElementById("intro").style.display="none";
+        gsap.to("#site",{autoAlpha:1,duration:.9});
+        ScrollTrigger.refresh();
+        window.scrollTo({top:0,behavior:"auto"});
+      }
+    });
+}
+
+cakeButton.addEventListener("click",extinguish);
+cakeButton.addEventListener("keydown",event=>{
+  if(event.key==="Enter" || event.key===" "){
+    event.preventDefault();
+    extinguish();
+  }
+});
+
+/* Intro animation */
+gsap.timeline({defaults:{ease:"power3.out"}})
+  .from(".intro-kicker",{opacity:0,y:15,duration:.5})
+  .from(".intro h1",{opacity:0,y:30,scale:.96,duration:.8},"-=.25")
+  .from(".intro-sub",{opacity:0,y:15,duration:.55},"-=.45")
+  .from(".cake-wrap",{opacity:0,y:25,scale:.9,duration:.8},"-=.35")
+  .from(".blow-panel",{opacity:0,y:15,duration:.55},"-=.35");
+
+gsap.utils.toArray(".card,.trait,.game,.final-card").forEach(el=>{
+  gsap.from(el,{opacity:0,y:45,scale:.97,duration:.85,ease:"power3.out",
+    scrollTrigger:{trigger:el,start:"top 85%",once:true}});
+});
+
+function scrollToId(id){document.getElementById(id).scrollIntoView({behavior:"smooth"})}
+
+/* confetti */
+function birthdayConfetti(){
+  for(let i=0;i<70;i++){
+    const p=document.createElement("i");
+    p.style.position="fixed";p.style.top="-20px";p.style.left=Math.random()*100+"vw";
+    p.style.width="8px";p.style.height="13px";p.style.zIndex="1000";p.style.pointerEvents="none";
+    p.style.background=["#ef5d83","#ffb18e","#ffd6df","#c7b8ff","#fff"][Math.floor(Math.random()*5)];
+    p.style.borderRadius=Math.random()>.5?"50%":"2px";
+    document.body.appendChild(p);
+    gsap.to(p,{y:innerHeight+100,x:(Math.random()-.5)*450,rotation:Math.random()*900,opacity:0,
+      duration:2+Math.random()*1.5,delay:Math.random()*.35,ease:"power1.out",onComplete:()=>p.remove()});
+  }
+}
+
+/* games */
+let heartTimer,score=0;
+function startHeartGame(){
+  clearInterval(heartTimer);score=0;document.getElementById("heartScore").textContent=0;
+  const area=document.getElementById("heartGame");area.querySelectorAll(".game-heart").forEach(x=>x.remove());
+  heartTimer=setInterval(spawnHeart,520);setTimeout(()=>clearInterval(heartTimer),10000);
+}
+function spawnHeart(){
+  const area=document.getElementById("heartGame"),h=document.createElement("div");
+  h.className="game-heart";h.textContent=Math.random()>.25?"♡":"♥";
+  h.style.left=(7+Math.random()*85)+"%";h.style.top=(20+Math.random()*65)+"%";area.appendChild(h);
+  gsap.fromTo(h,{scale:.2,opacity:0},{scale:1,opacity:1,duration:.2});
+  h.onclick=()=>{
+    score++;document.getElementById("heartScore").textContent=score;
+    gsap.to(h,{scale:1.8,opacity:0,duration:.18,onComplete:()=>h.remove()});
+    if(score===10)birthdayConfetti();
+  };
+  setTimeout(()=>{if(h.parentNode)gsap.to(h,{opacity:0,duration:.25,onComplete:()=>h.remove()})},1300);
+}
+
+let smileLevel=0;
+function smile(){
+  smileLevel=Math.min(100,smileLevel+20);
+  gsap.to("#smileFill",{width:smileLevel+"%",duration:.55,ease:"power3.out"});
+  const r=document.getElementById("smileResult");
+  r.textContent=smileLevel<40?"Come on... give me the real one. 😌":
+    smileLevel<80?"There it is. Much better.":
+    smileLevel<100?"Okay. That's a dangerously good smile.":
+    "Scientific conclusion: yep, it's as good as advertised. 😂";
+  if(smileLevel===100)birthdayConfetti();
+}
+function quiz(a){
+  document.getElementById("quizResult").textContent=a===2?
+    "Correct. Finally, someone understands birthdays. 🍰":
+    a===1?"Absolutely not. Today productivity is cancelled. 😂":
+    "Nope. Today is special. Act accordingly. 😌";
+}
+function fortune(){
+  const f=[
+    "Something unexpectedly nice is going to happen soon.",
+    "You're going to laugh harder than you expected this year.",
+    "Someone is going to compliment your smile again. Fair warning.",
+    "An unplanned adventure will probably become a good memory.",
+    "You will continue having significantly more energy than everyone around you.",
+    "This year looks suspiciously good for new memories.",
+    "Someone is going to make you laugh at exactly the wrong time.",
+    "You're entering an era of being slightly more spoiled. Enjoy it."
+  ];
+  const b=document.getElementById("fortune");
+  gsap.to(b,{opacity:0,y:5,duration:.18,onComplete:()=>{
+    b.textContent=f[Math.floor(Math.random()*f.length)];
+    gsap.to(b,{opacity:1,y:0,duration:.45});
+  }});
+}
+function compliment(){
+  const c=[
+    "You're very easy to like. Just thought you should know. ♡",
+    "Your energy is genuinely contagious.",
+    "You have a smile that makes people forget what they were saying.",
+    "You make being yourself look very easy.",
+    "You have a very unfair combination of charm and cuteness. 😌",
+    "You're one of those people who leaves a good mood behind."
+  ];
+  document.getElementById("compliment").textContent=c[Math.floor(Math.random()*c.length)];
+}
+let bad=0;
+function badIdea(){
+  bad++;
+  const m=["I specifically asked you not to. 😭","You know what? Fine. You're cute. Continue.","This button is clearly encouraging you.","At this point you're just enjoying pressing buttons.","Okay, I'm retiring this button. Happy birthday. 😂"];
+  document.getElementById("badResult").textContent=m[Math.min(bad-1,m.length-1)];
+}
+function revealSecret(){
+  document.getElementById("secret").classList.add("show");
+  document.getElementById("revealButton").textContent="Okay, you found it 😌";
+  gsap.fromTo("#secret",{opacity:0,y:25,scale:.96},{opacity:1,y:0,scale:1,duration:.8,ease:"back.out(1.5)"});
+  birthdayConfetti();
+}
+</script>
+</body>
+</html>
